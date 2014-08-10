@@ -90,7 +90,7 @@ $(function(){
     $(".create-anon-btn").click(function(){
         console.log("creating vps...");
         $.ajax({
-            url: "http://ajax.freemicrovps.com/create.php",
+            url: "http://ajax.freemicrovps.com/create.php?ajax",
             error: function(jqxhr, textStatus){
                 console.log("ajax error: "+textStatus);
                 showModal("Error", "Error contacting server, please try again later.");
