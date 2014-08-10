@@ -95,7 +95,6 @@ $(function(){
                 console.log("ajax error: "+textStatus);
                 showModal("Error", "Error contacting server, please try again later.");
             },
-            data: ["ajax"]
             dataType: "jsonp",
             type: "POST"
         }).done(function(data){
