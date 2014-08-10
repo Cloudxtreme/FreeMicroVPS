@@ -1,5 +1,21 @@
-.header {
+html, body {
+    max-height: 100%;
 }
+
+#modal-template {
+    max-height: 90%;
+    overflow: visible;
+}
+
+#modal-template .modal-body {
+    overflow: auto;
+}
+
+#modal-template .modal-dialog,
+#modal-template .modal-content {
+    max-height: 100%;
+}
+
 
 .modal-header {
     background-color: #fff;
@@ -19,14 +35,6 @@
 
 .navbar-header a.brand {
     padding-right: 0;
-}
-
-.modal-noscroll .modal {
- overflow-y: auto;
-}
-
-.modal-noscroll .modal-open {
- overflow: auto;
 }
 
 #modal-template p, #modal-template li {

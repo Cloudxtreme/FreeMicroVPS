@@ -1,27 +1,30 @@
+//init modal
+var modal_is_visible = false;
+
+// set modal body height (must be set for "overflow: auto" style to create a scrollbar)
+function set_modal_height(){
+    console.log("setting height");
+    
+    // hide the modal body before measuring the modal size so we know how big to make the modal body
+    $("#modal-template .modal-body").hide();
+    
+    var page_height = $(window).height();
+    var modal_height = $("#modal-template .modal-dialog").outerHeight(true);
+    var new_height = Math.max(0, page_height - modal_height);
+    console.log("page height: "+page_height);
+    console.log("modal_height: "+modal_height);
+    console.log("new_height: "+new_height);
+
+    // set the height and show the body
+    $("#modal-template .modal-body").css("max-height", new_height+"px");
+    $("#modal-template .modal-body").show();
+}
+
 // if footer is null it will be hidden, if undefined it will be a close button
-function showModal(title, body, footer, size)
+function showModal(title, body, size)
 {
     $("#modal-template .modal-title").html(title);
-    $("#modal-template .modal-body").html(body);
-    
-    // determine how to display the footer
-    if(footer === null)
-        $("#modal-template .modal-footer").hide();
-    else
-    {
-        $("#modal-template .modal-footer").show();
-
-        if(footer === undefined)
-        {
-            $("#modal-template .modal-footer-contents").hide();
-            $("#modal-template .modal-footer button").show();
-        }
-        else
-        {
-            $("#modal-template .modal-footer-contents").show();
-            $("#modal-template .modal-footer button").hide();
-        }
-    }
+    $("#modal-template .modal-body-contents").html(body);
 
     switch(size)
     {
@@ -43,7 +46,18 @@ function showModal(title, body, footer, size)
     }
 
     $("#modal-template").modal("show");
+    set_modal_height();
 }
+
+// init modal
+$(function(){
+    // set height on page resize and modal shown events
+    $(window).resize(function(){ if(modal_is_visible) set_modal_height(); });
+
+    // set events to toggle modal_is_visible variable
+    $("#modal-template").on("hide.bs.modal", function(){ modal_is_visible = false; });
+    $("#modal-template").on("show.bs.modal", function(){ modal_is_visible = true; });
+});
 
 // misc js init
 $(function(){
@@ -70,11 +84,11 @@ $(function(){
 // register click handlers
 $(function(){
     $(".toggle-privacy-modal").click(function(){
-        showModal("Privacy Policy", privacy_policy);
+        showModal("Privacy Policy", privacy_policy, "Footer");
     });
     
     $(".toggle-tos-modal").click(function(){
-        showModal("Web Site Terms and Conditions of Use", tos);
+        showModal("Web Site Terms and Conditions of Use", tos, "footer", "large");
     });
     $(".toggle-anon-restrict-modal").click(function(){
         showModal("Anonymous Account Restrictions", anon_restrict);
