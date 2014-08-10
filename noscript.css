@@ -1,0 +1,19 @@
+.fa {
+    display: inline-block;
+    overflow: hidden;
+    color: transparent;
+    font-family: sans-serif;
+    width: 16px;
+    height: 16px;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+.fa-fw.fa-2x {
+    width: 55px;
+    height: 40px;
+    margin: 2px 13px 0 0;
+    padding: 0;
+}
+
+.fa-cloud { background-image: url('logo.png'); }
