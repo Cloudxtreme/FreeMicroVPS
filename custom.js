@@ -107,15 +107,15 @@ $(function(){
             url: "http://ajax.freemicrovps.com/create.php",
             error: function(jqxhr, textStatus){
                 console.log("ajax error: "+textStatus);
-                showModal("Error", "Error contacting server, please try again later.");
+                showModal("Error", "Error contacting server, please try again later.", "sm");
             },
             dataType: "jsonp",
             type: "POST"
         }).done(function(data){
             if(data.err)
-                showModal("Error", data.msg);
+                showModal("Error", data.msg, "sm");
             else
-                showModal("New VPS Created", data.msg);
+                showModal("New VPS Created", data.msg, "sm");
             console.log("created account");
         },"json");
     });
