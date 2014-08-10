@@ -18,18 +18,18 @@
     padding-right: 0;
 }
 
-.modal-noscroll .modal {
+/**.modal-noscroll .modal {
  overflow-y: auto;
 }
-
-.modal-noscroll .modal-open {
+**/
+/**.modal-noscroll .modal-open {
  overflow: auto;
 }
-
-#modal-template p, #modal-template li {
+**/
+/**#modal-template p, #modal-template li {
     font-size: 14px;
 }
-
+**/
 .navbar-header i {
     width: 50px;
     margin-right:15px;
@@ -38,19 +38,19 @@
 #header {
     background: none;
 }
-.reg-signup-form .reg-buttons {
+/**.reg-signup-form .reg-buttons {
     text-align: right;
     margin: 0;
 }
-
+**/
 .modal {
     overflow-y: auto;
 }
 
-.modal-open {
+/**.modal-open {
     overflow: auto;
 }
-
+**/
 .text-outline-white {
   /* WebKit (Safari/Chrome) Only */
   -webkit-text-stroke: 1px white;
@@ -110,56 +110,57 @@
     color: white;
 }
 
-.reg-signup-form .form {
+/**.reg-signup-form .form {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
-.reg-signup-form .form .form-group:first-child + .form-group {
+**//**.reg-signup-form .form .form-group:first-child + .form-group {
   display: table;
   width: 100%;
 }
-.reg-signup-form .form .form-group:first-child + .form-group > div {
+**//**.reg-signup-form .form .form-group:first-child + .form-group > div {
   display: table-cell;
   width: 50%;
   padding-left: 5px;
 }
-@media (max-width: 767px) {
+**//**@media (max-width: 767px) {
   .reg-signup-form .form .form-group:first-child + .form-group > div {
     padding-left: 9px;
   }
 }
-.reg-signup-form .form .form-group:first-child + .form-group > div:first-child {
+**//**.reg-signup-form .form .form-group:first-child + .form-group > div:first-child {
   padding-left: 0;
   padding-right: 5px;
 }
-@media (max-width: 767px) {
+**//**@media (max-width: 767px) {
   .reg-signup-form .form .form-group:first-child + .form-group > div:first-child {
     padding-right: 9px;
   }
 }
-.reg-signup-form .form .form-group:first-child + .form-group input {
+**//**.reg-signup-form .form .form-group:first-child + .form-group input {
   width: 100%;
 }
-@media (max-width: 767px) {
+**//**@media (max-width: 767px) {
   .reg-signup-form .form .btn {
     margin: 9px 0;
   }
 }
-.reg-signup-form .form .btn.btn-info:hover,
+**//**.reg-signup-form .form .btn.btn-info:hover,
 .reg-signup-form .form .btn.btn-info:focus {
   background-color: #16a085;
 }
-.reg-signup-form .form .btn.btn-info:active,
+**//**.reg-signup-form .form .btn.btn-info:active,
 .reg-signup-form .form .btn.btn-info.active {
   background-color: #138871;
 }
-@media (max-width: 767px) {
+**//**@media (max-width: 767px) {
   .reg-signup-form .form input[type="text"],
   .reg-signup-form .form input[type="password"] {
     height: 41px;
   }
 }
-@media (max-width: 480px) {
+**//**@media (max-width: 480px) {
   .reg-signup-form .form {
     margin-top: 25px;
   }
 }
+**/
