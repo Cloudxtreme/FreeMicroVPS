@@ -12,7 +12,7 @@
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
         <!--<link rel="stylesheet" href="/style.css">
         <link rel="stylesheet" href="/custom.css">-->
-        <link rel="stylesheet" href="/style.combined.min.css">
+        <link rel="stylesheet" href="/combined.min.css">
         <noscript><link rel="stylesheet" href="/noscript.css"></noscript>
     </head>
     <body>
