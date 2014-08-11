@@ -102,21 +102,15 @@ $(function(){
 
     // "create anonymous account" buttons
     $(".create-anon-btn").click(function(){
-        console.log("creating vps...");
         $.ajax({
             url: "http://ajax.freemicrovps.com/create.php",
             error: function(jqxhr, textStatus){
-                console.log("ajax error: "+textStatus);
                 showModal("Error", "Error contacting server, please try again later.", "sm");
             },
             dataType: "jsonp",
             type: "POST"
         }).done(function(data){
-            if(data.err)
-                showModal("Error", data.msg, "sm");
-            else
-                showModal("New VPS Created", data.msg, "sm");
-            console.log("created account");
+            showModal(data.title, data.msg, "sm");
         },"json");
     });
 });
