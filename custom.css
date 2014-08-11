@@ -21,7 +21,9 @@ html, body {
     background-color: #fff;
 }
 
-.close, .close:hover, .close:focus {
+.close,
+.close:hover,
+.close:focus {
     color: #000;
 }
 
@@ -37,7 +39,8 @@ html, body {
     padding-right: 0;
 }
 
-#modal-template p, #modal-template li {
+#modal-template p,
+#modal-template li {
     font-size: 14px;
 }
 
