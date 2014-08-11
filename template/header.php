@@ -7,7 +7,7 @@
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
         <meta name="apple-mobile-web-app-status-bar-style" content="black">
-        <link rel="shortcut icon" href="http://freemicrovps.com/flat-ui/images/favicon.ico">
+        <link rel="shortcut icon" href="//freemicrovps.com/img/favicon.ico">
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootswatch/3.2.0/flatly/bootstrap.min.css">
         <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css">
         <!--<link rel="stylesheet" href="/style.css">
