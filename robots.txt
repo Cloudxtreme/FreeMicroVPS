@@ -1,4 +1,2 @@
 User-agent: *
 Disallow: /
-Allow: /sitemap.htm
-Sitemap: http://freemicrovps.com/sitemap.xml
