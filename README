@@ -1,3 +1,4 @@
-FreeMicroVPS Chef Cookbook
+FreeMicroVPS Chef Cookbooks
 ==========
 
+To set up the FreeMicroVPS server, on a fresh Ubuntu 14.04 (with chef installed) run `sudo chef-client -z -o freemicrovps -j freemicrovps.json`.
