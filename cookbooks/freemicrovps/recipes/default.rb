@@ -12,59 +12,10 @@
     package p
 end
 
-# create lxc users
-counter = 1     # count number of users created (for mapped UIDs/GIDs)
-node[:lxc][:unprivileged][:users].each do |u|
-
-    # create the user, group, and home directory
-    user u do
-        home "/home/"+u
-        action :create
-    end
-
-    group u do
-        action :create
-        members u
-    end
-
-    directory "/home/"+u do
-        mode "0700"
-        user u
-        group u
-    end
-
-    # configure unprivileged lxc containers
-
-    # map IDs
-    node.default[:mapped_ids] = 100000 * counter
-
-    execute "map UIDs" do
-        command "usermod --add-subuids #{node.default[:mapped_ids]}-#{node.default[:mapped_ids] + 65536} #{u}"
-        action :run
-    end
-
-    execute "map GIDs" do
-        command "usermod --add-subgids #{node.default[:mapped_ids]}-#{node.default[:mapped_ids] + 65536} #{u}"
-        action :run
-    end
-
-    directory "/home/#{u}/.config/lxc" do
-        recursive true
-        mode "0700"
-        user u
-        group u
-    end
-
-    # configure mapped IDs
-    template "/home/"+u+"/.config/lxc/default.conf" do
-        source "lxc_default.conf.erb"
-        mode "0600"
-        owner u
-        group u
-    end
-
-    # increment the counter
-    counter = counter + 1
+# create ssh keys for root
+execute "create root ssh keys" do
+    command "ssh-keygen -t rsa -f ~/.ssh/id_rsa -N ''"
+    action :run
 end
 
 # set limit on number of veth devices created by each lxc user
@@ -76,5 +27,108 @@ template "/etc/lxc/lxc-usernet" do
     variables({
         :lxc_users => node[:lxc][:unprivileged][:users]
     })
+end
+
+# create lxc users
+counter = 0     # count number of users created (for mapped UIDs/GIDs)
+node[:lxc][:unprivileged][:users].each do |name|
+
+    # increment the counter
+    counter = counter + 1
+
+    # create the user, group, and home directory
+    user name do
+        home "/home/"+name
+        shell "/bin/bash"
+        password "$1$cVfXPj7V$ODuKyEYiA8iRRsnUoVP1L1"   # password = "changeme"
+        action :create
+    end
+
+    group name do
+        action :create
+        members name
+    end
+
+    directory "/home/"+name do
+        mode "0711"
+        user name
+        group name
+    end
+
+    # create ssh config dir
+    directory "/home/#{name}/.ssh" do
+        mode "0700"
+        user name
+        group name
+    end
+
+    # copy root's ssh public key into the user's .ssh dir
+    execute "copy ssh public key to .ssh dir" do
+        command "cp ~/.ssh/id_rsa.pub /home/#{name}/.ssh/authorized_keys"
+        action :run
+    end
+    
+    # configure unprivileged lxc containers
+
+    # map IDs
+    mapped_ids = 100000 * counter
+
+    execute "map UIDs" do
+        command "usermod --add-subuids #{mapped_ids}-#{mapped_ids + 65536} #{name}"
+        action :run
+    end
+
+    execute "map GIDs" do
+        command "usermod --add-subgids #{mapped_ids}-#{mapped_ids + 65536} #{name}"
+        action :run
+    end
+
+    directory "/home/#{name}/.config/lxc" do
+        recursive true
+        mode "0700"
+        user name
+        group name
+    end
+
+    # configure mapped IDs
+    template "/home/"+name+"/.config/lxc/default.conf" do
+        source "lxc_default.conf.erb"
+        mode "0600"
+        owner name
+        group name
+        variables({
+            :mapped_ids => mapped_ids
+        })
+    end
+
+    # create container
+    execute "create #{name} container" do
+        command "sudo -i -u #{name} lxc-create -n #{name} -t download -- -d ubuntu -r trusty -a amd64"
+        action :run
+    end
+
+    # start container
+    execute "start #{name} container" do
+        command "ssh -oStrictHostKeyChecking=no #{name}@localhost lxc-start -n #{name} -d"
+        action :run
+    end
+
+    # copy the init script to the container (installs git and chef and downloads and runs the recipe)
+    template "/home/#{name}/.local/share/lxc/#{name}/rootfs/root/init.sh" do
+        source "init_container.sh"
+        mode "0777"
+        owner "root"
+        group "root"
+        variables({
+            :name => name
+        })
+    end
+
+    # set up the httpd container
+    execute "set up #{name} container" do
+        command "ssh -oStrictHostKeyChecking=no #{name}@localhost lxc-attach -n #{name} -- /root/init.sh"
+        action :run
+    end
+
 end
 

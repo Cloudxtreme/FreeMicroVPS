@@ -6,6 +6,7 @@ Requirements
 ------------
 - Ubuntu 14.04
 - /dev/sda3 - unused partition for virtual machines
+- Ubuntu packages: chef ruby-shadow
 
 Attributes
 ----------
