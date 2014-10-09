@@ -9,4 +9,5 @@ apt-get -y install git chef
 git clone https://github.com/br1cked/FreeMicroVPS.git /tmp/cookbook
 
 # configure the container
+cd /tmp/cookbook
 chef-client -z -o <%= @name %>
