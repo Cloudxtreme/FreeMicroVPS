@@ -7,14 +7,27 @@
 # All rights reserved - Do Not Redistribute
 #
 
+# misc host system config
+###############################
+
 # install required packages for LXC unprivileged containers
-['lxc', 'systemd-services', 'uidmap'].each do |p|
+['lxc', 'systemd-services', 'uidmap', 'iptables-persistent'].each do |p|
     package p
 end
 
 # create ssh keys for root
 execute "create root ssh keys" do
     command "ssh-keygen -t rsa -f ~/.ssh/id_rsa -N ''"
+    action :run
+end
+
+# set cfq io scheduler
+execute "set io scheduler" do
+    command "sed -r -i 's/(GRUB_CMDLINE_LINUX=\")(\")/\\1elevator=cfq\\2/' /etc/default/grub"
+    action :run
+end
+execute "update grub" do
+    command "update-grub"
     action :run
 end
 
@@ -29,7 +42,9 @@ template "/etc/lxc/lxc-usernet" do
     })
 end
 
-# create lxc users
+# create lxc users and containers
+###############################
+
 counter = 0     # count number of users created (for mapped UIDs/GIDs)
 node[:lxc][:unprivileged][:users].each do |name|
 
@@ -132,3 +147,30 @@ node[:lxc][:unprivileged][:users].each do |name|
 
 end
 
+
+# set up networking
+###############################
+
+# set up dhcp
+dhcp_hosts = {"lxc"=>"10.0.3.2", "www"=>"10.0.3.3"}
+template "/etc/lxc/dnsmasq.conf" do
+    source "dnsmasq.conf"
+    mode "0644"
+    owner "root"
+    group "root"
+    variables({
+        :dhcp_hosts => dhcp_hosts
+    })
+end
+
+# set up port forwarding for http server
+template "/etc/iptables/rules.v4" do
+    source "iptables_rules.v4"
+    mode "0644"
+    owner "root"
+    group "root"
+    variables({
+        :http_ip => dhcp_hosts["www"],
+        :http_port => "80"
+    })
+end

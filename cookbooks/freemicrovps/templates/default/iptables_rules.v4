@@ -1,0 +1,1 @@
+iptables -t nat -A PREROUTING -p tcp -i eth0 --dport <%= @http_port %> -j DNAT --to-destination <%= @http_ip .. ":" .. @http_port %>
