@@ -18,7 +18,7 @@ end
 # create ssh keys for root
 execute "create root ssh keys" do
     command "ssh-keygen -t rsa -f ~/.ssh/id_rsa -N ''"
-    not_if { ::File.exists?("~/.ssh/id_rsa") }
+    not_if "ls ~/.ssh/id_rsa"
     action :run
 end
 
@@ -38,6 +38,37 @@ template "/etc/lxc/lxc-usernet" do
     variables({
         :lxc_users => node[:lxc][:unprivileged][:users]
     })
+end
+
+# set up networking
+###############################
+
+# set up dhcp
+dhcp_hosts = {"lxc"=>"10.0.3.100", "www"=>"10.0.3.101"}
+template "/etc/lxc/dnsmasq.conf" do
+    source "dnsmasq.conf"
+    mode "0644"
+    owner "root"
+    group "root"
+    variables({
+        :dhcp_hosts => dhcp_hosts
+    })
+end
+
+template "/etc/default/lxc-net" do
+    source "lxc-net"
+    mode "0644"
+    owner "root"
+    group "root"
+end
+
+# set up port forwarding for http server
+bash "enable port 80 DNAT" do
+    code <<-EOF
+        iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 80 -j DNAT --to-destination #{dhcp_hosts["www"]} && 
+        iptables-save > /etc/iptables/rules.v4
+    EOF
+    not_if "iptables -t nat -n -L | grep -E 'DNAT.*#{dhcp_hosts["www"].sub('\.','\\.')}'"
 end
 
 # create lxc users and containers
@@ -120,21 +151,23 @@ node[:lxc][:unprivileged][:users].each do |name|
     # create container
     execute "create #{name} container" do
         command "sudo -i -u #{name} lxc-create -n #{name} -t download -- -d ubuntu -r trusty -a amd64"
-        not_if "sudo -i -u #{name} lxc-ls | grep www"
+        not_if "sudo -i -u #{name} lxc-ls | grep #{name}"
         action :run
     end
 
     # start container
     execute "start #{name} container" do
         command "ssh -oStrictHostKeyChecking=no #{name}@localhost lxc-start -n #{name} -d"
-        only_if "ssh -oStrictHostKeyChecking=no #{name}@localhost lxc-ls --stopped | grep www"
+        only_if "ssh -oStrictHostKeyChecking=no #{name}@localhost lxc-ls --stopped | grep #{name}"
         action :run
     end
 
     # unfreeze container (may be needed if chef is used to update server config and container is frozen)
     execute "unfreeze #{name} container" do
         command "ssh -oStrictHostKeyChecking=no #{name}@localhost lxc-freeze -n #{name} -d"
-        only_if "ssh -oStrictHostKeyChecking=no #{name}@localhost lxc-ls --frozen | grep www"
+        only_if "ssh -oStrictHostKeyChecking=no #{name}@localhost lxc-ls --frozen | grep #{name}"
+        action :run
+    end
 
     # copy the init script to the container (installs git and chef and downloads and runs the recipe)
     template "/home/#{name}/.local/share/lxc/#{name}/rootfs/root/init.sh" do
@@ -156,30 +189,3 @@ node[:lxc][:unprivileged][:users].each do |name|
 
 end
 
-
-# set up networking
-###############################
-
-# set up dhcp
-dhcp_hosts = {"lxc"=>"10.0.3.2", "www"=>"10.0.3.3"}
-template "/etc/lxc/dnsmasq.conf" do
-    source "dnsmasq.conf"
-    mode "0644"
-    owner "root"
-    group "root"
-    variables({
-        :dhcp_hosts => dhcp_hosts
-    })
-end
-
-# set up port forwarding for http server
-template "/etc/iptables/rules.v4" do
-    source "iptables_rules.v4"
-    mode "0644"
-    owner "root"
-    group "root"
-    variables({
-        :http_ip => dhcp_hosts["www"],
-        :http_port => "80"
-    })
-end
