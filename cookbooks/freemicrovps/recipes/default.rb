@@ -18,16 +18,14 @@ end
 # create ssh keys for root
 execute "create root ssh keys" do
     command "ssh-keygen -t rsa -f ~/.ssh/id_rsa -N ''"
+    not_if { ::File.exists?("~/.ssh/id_rsa") }
     action :run
 end
 
 # set cfq io scheduler
-execute "set io scheduler" do
-    command "sed -r -i 's/(GRUB_CMDLINE_LINUX=\")(\")/\\1elevator=cfq\\2/' /etc/default/grub"
-    action :run
-end
-execute "update grub" do
-    command "update-grub"
+bash "set io scheduler" do
+    code "sed -r -i 's/(GRUB_CMDLINE_LINUX=\")(\")/\\1elevator=cfq\\2/' /etc/default/grub && update-grub"
+    not_if "grep elevator=cfq /etc/default/grub"
     action :run
 end
 
@@ -80,6 +78,7 @@ node[:lxc][:unprivileged][:users].each do |name|
     # copy root's ssh public key into the user's .ssh dir
     execute "copy ssh public key to .ssh dir" do
         command "cp ~/.ssh/id_rsa.pub /home/#{name}/.ssh/authorized_keys"
+        not_if { ::File.exists?("/home/#{name}/.ssh/authorized_keys") }
         action :run
     end
     
@@ -90,11 +89,13 @@ node[:lxc][:unprivileged][:users].each do |name|
 
     execute "map UIDs" do
         command "usermod --add-subuids #{mapped_ids}-#{mapped_ids + 65536} #{name}"
+        not_if "grep #{name} /etc/subuid"
         action :run
     end
 
     execute "map GIDs" do
         command "usermod --add-subgids #{mapped_ids}-#{mapped_ids + 65536} #{name}"
+        not_if "grep #{name} /etc/subgid"
         action :run
     end
 
@@ -119,14 +120,21 @@ node[:lxc][:unprivileged][:users].each do |name|
     # create container
     execute "create #{name} container" do
         command "sudo -i -u #{name} lxc-create -n #{name} -t download -- -d ubuntu -r trusty -a amd64"
+        not_if "sudo -i -u #{name} lxc-ls | grep www"
         action :run
     end
 
     # start container
     execute "start #{name} container" do
         command "ssh -oStrictHostKeyChecking=no #{name}@localhost lxc-start -n #{name} -d"
+        only_if "ssh -oStrictHostKeyChecking=no #{name}@localhost lxc-ls --stopped | grep www"
         action :run
     end
+
+    # unfreeze container (may be needed if chef is used to update server config and container is frozen)
+    execute "unfreeze #{name} container" do
+        command "ssh -oStrictHostKeyChecking=no #{name}@localhost lxc-freeze -n #{name} -d"
+        only_if "ssh -oStrictHostKeyChecking=no #{name}@localhost lxc-ls --frozen | grep www"
 
     # copy the init script to the container (installs git and chef and downloads and runs the recipe)
     template "/home/#{name}/.local/share/lxc/#{name}/rootfs/root/init.sh" do
@@ -139,9 +147,10 @@ node[:lxc][:unprivileged][:users].each do |name|
         })
     end
 
-    # set up the httpd container
+    # set up the httpd container (install chef, download cookbooks, run chef)
     execute "set up #{name} container" do
         command "ssh -oStrictHostKeyChecking=no #{name}@localhost lxc-attach -n #{name} -- /root/init.sh"
+        timeout 6000
         action :run
     end
 
